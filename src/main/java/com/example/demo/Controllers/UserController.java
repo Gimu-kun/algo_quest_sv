@@ -1,9 +1,13 @@
 package com.example.demo.Controllers;
 
+import com.auth0.jwt.interfaces.DecodedJWT;
+import com.example.demo.Dto.Auth.AuthResponse;
 import com.example.demo.Entity.User;
+import com.example.demo.Enums.UserRoleEnum;
 import com.example.demo.Services.UserService;
 import com.example.demo.Utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,6 +15,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/users")
+@CrossOrigin("*")
 public class UserController {
 
     @Autowired
@@ -70,5 +75,42 @@ public class UserController {
                     return ResponseEntity.ok(response);
                 })
                 .orElse(ResponseEntity.status(401).build());
+    }
+
+    // Xác thực
+    @GetMapping("/auth")
+    public ResponseEntity<AuthResponse> authenticateAdmin(@RequestHeader(name = HttpHeaders.AUTHORIZATION, required = false) String authHeader) {
+
+        AuthResponse invalidResponse = new AuthResponse(false, null, null, null);
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.ok(invalidResponse);
+        }
+
+        String token = authHeader.substring(7);
+
+        DecodedJWT decodedJWT = jwtUtil.decodeToken(token);
+
+        if (decodedJWT == null) {
+            return ResponseEntity.ok(invalidResponse);
+        }
+
+        try {
+            String userIdStr = decodedJWT.getSubject();
+            String roleStr = decodedJWT.getClaim("role").asString();
+            UserRoleEnum role = UserRoleEnum.valueOf(roleStr);
+            Integer userId = Integer.parseInt(userIdStr);
+
+            Optional<User> userOpt = userService.getUserById(userId);
+            String username = userOpt.map(User::getUsername).orElse(null);
+
+            boolean isAuthenticated = (role == UserRoleEnum.admin);
+
+            AuthResponse response = new AuthResponse(isAuthenticated, role, userId, username);
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            return ResponseEntity.ok(invalidResponse);
+        }
     }
 }

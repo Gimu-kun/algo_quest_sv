@@ -10,6 +10,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/user-progress")
+@CrossOrigin("*")
 public class UserProgressController {
 
     @Autowired

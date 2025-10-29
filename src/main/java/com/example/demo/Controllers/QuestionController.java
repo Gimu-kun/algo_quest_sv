@@ -1,5 +1,6 @@
 package com.example.demo.Controllers;
 
+import com.example.demo.Dto.Question.QuestionResponseDto;
 import com.example.demo.Entity.Question;
 import com.example.demo.Services.QuestionService;
 import com.example.demo.Dto.Question.QuestionCreateDto;
@@ -13,6 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/questions")
+@CrossOrigin("*")
 public class QuestionController {
 
     private final QuestionService questionService;
@@ -38,16 +40,16 @@ public class QuestionController {
     // GET: /api/questions
     // READ ALL: Lấy tất cả câu hỏi
     @GetMapping
-    public ResponseEntity<List<Question>> getAllQuestions() {
-        List<Question> questions = questionService.getAllQuestions();
+    public ResponseEntity<List<QuestionResponseDto>> getAllQuestions() {
+        List<QuestionResponseDto> questions = questionService.getAllQuestions(); // <-- Gọi hàm mới
         return ResponseEntity.ok(questions);
     }
 
     // GET: /api/questions/{id}
     // READ BY ID: Lấy câu hỏi theo ID (cũng hiển thị Answers nhờ @JsonManagedReference)
     @GetMapping("/{id}")
-    public ResponseEntity<Question> getQuestionById(@PathVariable Integer id) {
-        return questionService.getQuestionById(id)
+    public ResponseEntity<QuestionResponseDto> getQuestionById(@PathVariable Integer id) { // <-- Thay đổi kiểu trả về
+        return questionService.getQuestionDtoById(id) // <-- Thay đổi tên phương thức gọi
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }

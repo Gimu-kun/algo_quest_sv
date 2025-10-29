@@ -1,6 +1,8 @@
 package com.example.demo.Services;
 
 import com.example.demo.Dto.Answer.AnswerDto;
+import com.example.demo.Dto.Quest.QuestNameProjection;
+import com.example.demo.Dto.Question.QuestionResponseDto;
 import com.example.demo.Entity.Answer;
 import com.example.demo.Entity.Question;
 import com.example.demo.Entity.Quest;
@@ -59,6 +61,7 @@ public class QuestionService {
                     answer.setAnswerText(answerDto.getAnswerText());
                     answer.setCorrect(answerDto.getIsCorrect());
                     answer.setQuestion(question);
+                    answer.setAnswerMeta(answerDto.getAnswerMeta());
                     return answer;
                 })
                 .collect(Collectors.toSet());
@@ -69,14 +72,52 @@ public class QuestionService {
     }
 
     // READ ALL
-    public List<Question> getAllQuestions() {
-        return questionRepository.findAll();
+    @Transactional
+    public List<QuestionResponseDto> getAllQuestions() {
+        List<Question> questions = questionRepository.findAll();
+
+        return questions.stream()
+                .map(question -> {
+                    // 1. Tải và map thông tin Quest
+                    Quest questEntity = question.getQuest();
+                    if (questEntity == null) {
+                        // Xử lý trường hợp quest là null nếu không bắt buộc
+                        return new QuestionResponseDto(question, null);
+                    }
+
+                    // Tạo QuestNameProjection tạm thời từ Entity
+                    QuestNameProjection questProjection = new QuestNameProjection() {
+                        @Override
+                        public Integer getQuestId() {
+                            // Kích hoạt Lazy load
+                            return questEntity.getQuestId();
+                        }
+                        @Override
+                        public String getQuestName() {
+                            // Kích hoạt Lazy load
+                            return questEntity.getQuestName();
+                        }
+                    };
+
+                    // 2. Map sang DTO trả về (QuestionResponseDto)
+                    return new QuestionResponseDto(question, questProjection);
+                })
+                .collect(Collectors.toList());
     }
 
-    // READ BY ID
-    public Optional<Question> getQuestionById(Integer id) {
-        // Tùy chọn: Dùng @Transactional và fetch join nếu muốn tải luôn Answers
-        return questionRepository.findById(id);
+    @Transactional
+    public Optional<QuestionResponseDto> getQuestionDtoById(Integer id) {
+        return questionRepository.findById(id).map(question -> {
+            Quest questEntity = question.getQuest();
+            QuestNameProjection questProjection = null;
+            if (questEntity != null) {
+                questProjection = new QuestNameProjection() {
+                    @Override public Integer getQuestId() { return questEntity.getQuestId(); }
+                    @Override public String getQuestName() { return questEntity.getQuestName(); }
+                };
+            }
+            return new QuestionResponseDto(question, questProjection);
+        });
     }
 
     // UPDATE (Partial Update)
@@ -107,6 +148,7 @@ public class QuestionService {
 
                         answer.setAnswerText(answerDto.getAnswerText());
                         answer.setCorrect(answerDto.getIsCorrect());
+                        answer.setAnswerMeta(answerDto.getAnswerMeta());
                         answer.setQuestion(existingQuestion); // Thiết lập liên kết ngược
 
                         return answer;

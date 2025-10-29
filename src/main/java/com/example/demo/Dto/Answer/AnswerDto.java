@@ -13,13 +13,16 @@ public class AnswerDto {
     @NotNull
     private Boolean isCorrect;
 
+    private String answerMeta;
+
     public AnswerDto() {
     }
 
-    public AnswerDto(Integer answerId, String answerText, Boolean isCorrect) {
+    public AnswerDto(Integer answerId, String answerText, Boolean isCorrect, String answerMeta) {
         this.answerId = answerId;
         this.answerText = answerText;
         this.isCorrect = isCorrect;
+        this.answerMeta = answerMeta;
     }
 
     public Integer getAnswerId() {
@@ -44,5 +47,21 @@ public class AnswerDto {
 
     public void setIsCorrect(Boolean correct) {
         isCorrect = correct;
+    }
+
+    public Boolean getCorrect() {
+        return isCorrect;
+    }
+
+    public void setCorrect(Boolean correct) {
+        isCorrect = correct;
+    }
+
+    public String getAnswerMeta() {
+        return answerMeta;
+    }
+
+    public void setAnswerMeta(String answerMeta) {
+        this.answerMeta = answerMeta;
     }
 }

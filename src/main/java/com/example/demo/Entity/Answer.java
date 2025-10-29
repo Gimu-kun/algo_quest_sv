@@ -22,13 +22,16 @@ public class Answer {
     @Column(nullable = false)
     private Boolean isCorrect;
 
+    private String answerMeta;
+
     public Answer(){}
 
-    public Answer(Integer answerId, Question question, String answerText, Boolean isCorrect) {
+    public Answer(Integer answerId, Question question, String answerText, Boolean isCorrect, String answerMeta) {
         this.answerId = answerId;
         this.question = question;
         this.answerText = answerText;
         this.isCorrect = isCorrect;
+        this.answerMeta = answerMeta;
     }
 
     public Integer getAnswerId() {
@@ -63,6 +66,14 @@ public class Answer {
         isCorrect = correct;
     }
 
+    public String getAnswerMeta() {
+        return answerMeta;
+    }
+
+    public void setAnswerMeta(String answerMeta) {
+        this.answerMeta = answerMeta;
+    }
+
     @Override
     public String toString() {
         return "Answer{" +
@@ -70,6 +81,7 @@ public class Answer {
                 ", question=" + question +
                 ", answerText='" + answerText + '\'' +
                 ", isCorrect=" + isCorrect +
+                ", answerMeta='" + answerMeta + '\'' +
                 '}';
     }
 }

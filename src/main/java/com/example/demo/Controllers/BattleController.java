@@ -13,6 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/battles")
 @Tag(name = "Battle API", description = "CRUD cho Battle và BattleParticipant")
+@CrossOrigin("*")
 public class BattleController {
 
     @Autowired

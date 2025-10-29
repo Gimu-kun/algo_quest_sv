@@ -12,6 +12,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/quests")
 @Tag(name = "Quest API", description = "CRUD operations for Quest entity")
+@CrossOrigin("*")
 public class QuestController {
 
     @Autowired
