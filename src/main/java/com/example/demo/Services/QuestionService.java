@@ -42,6 +42,8 @@ public class QuestionService {
     public Question createQuestion(QuestionCreateDto createDto) {
         Question question = new Question();
         Integer questId = createDto.getQuestId();
+
+        // 1. Thiết lập Quest
         if (questId != null) {
             Quest questEntity = questRepository.findById(questId)
                     .orElseThrow(() -> new ResourceNotFoundException("Quest not found with id " + questId));
@@ -49,24 +51,35 @@ public class QuestionService {
             question.setQuest(questEntity);
         }
 
+        // 2. Thiết lập các trường cơ bản
         question.setQuestionText(createDto.getQuestionText());
         question.setBloomLevel(createDto.getBloomLevel());
         question.setQuestionType(createDto.getQuestionType());
         question.setCorrectXpReward(createDto.getCorrectXpReward());
+        question.setPartialCredit(createDto.getPartialCredit());
+        question.setSynonyms(createDto.getSynonyms());
+        question.setCodeTemplate(createDto.getCodeTemplate());
+        question.setTestCases(createDto.getTestCases());
+        question.setTestResults(createDto.getTestResults());
 
-        // 2. Thiết lập Answers
-        Set<Answer> answers = createDto.getAnswers().stream()
-                .map(answerDto -> {
-                    Answer answer = new Answer();
-                    answer.setAnswerText(answerDto.getAnswerText());
-                    answer.setCorrect(answerDto.getIsCorrect());
-                    answer.setQuestion(question);
-                    answer.setAnswerMeta(answerDto.getAnswerMeta());
-                    return answer;
-                })
-                .collect(Collectors.toSet());
+        // 4. Thiết lập Answers
+        // Đối với Programming, Answers có thể là List rỗng
+        if (createDto.getAnswers() != null) {
+            Set<Answer> answers = createDto.getAnswers().stream()
+                    .map(answerDto -> {
+                        Answer answer = new Answer();
+                        answer.setAnswerText(answerDto.getAnswerText());
+                        // Lưu ý: DTO từ FE có thể là isCorrect, cần đảm bảo setter đúng
+                        answer.setCorrect(answerDto.getIsCorrect());
+                        answer.setQuestion(question);
+                        answer.setAnswerMeta(answerDto.getAnswerMeta());
+                        return answer;
+                    })
+                    .collect(Collectors.toSet());
 
-        question.setAnswers(answers);
+            question.setAnswers(answers);
+        }
+
 
         return questionRepository.save(question);
     }
@@ -131,6 +144,12 @@ public class QuestionService {
         updateDto.getBloomLevel().ifPresent(existingQuestion::setBloomLevel);
         updateDto.getQuestionType().ifPresent(existingQuestion::setQuestionType);
         updateDto.getCorrectXpReward().ifPresent(existingQuestion::setCorrectXpReward);
+        updateDto.getPartialCredit().ifPresent(existingQuestion::setPartialCredit);
+        updateDto.getSynonyms().ifPresent(existingQuestion::setSynonyms);
+        updateDto.getCodeTemplate().ifPresent(existingQuestion::setCodeTemplate);
+        updateDto.getTestCases().ifPresent(existingQuestion::setTestCases);
+        updateDto.getTestResults().ifPresent(existingQuestion::setTestResults);
+
 
         // 2. TÍCH HỢP CẬP NHẬT/THAY THẾ ANSWERS
         List<AnswerDto> answerDtos = updateDto.getAnswers();

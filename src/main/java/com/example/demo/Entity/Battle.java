@@ -1,6 +1,9 @@
 package com.example.demo.Entity;
 
 import com.example.demo.Enums.BattleStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -14,6 +17,7 @@ public class Battle {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "topic_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "quests"})
     private Topic topic;
 
     @Column(nullable = false)
@@ -28,6 +32,8 @@ public class Battle {
     private Integer questionSetId;
 
     @OneToMany(mappedBy = "battle", cascade = CascadeType.ALL)
+    @JsonManagedReference("battle-participants")
+    @JsonIgnoreProperties({"battle"})
     private Set<BattleParticipant> participants;
 
     public Battle(){}

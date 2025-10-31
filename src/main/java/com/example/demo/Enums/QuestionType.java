@@ -8,5 +8,6 @@ public enum QuestionType {
     true_false,
     numeric,
     sequence,
-    matching
+    matching,
+    programming
 }

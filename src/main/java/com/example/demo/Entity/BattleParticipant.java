@@ -1,5 +1,7 @@
 package com.example.demo.Entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 @Entity
@@ -11,10 +13,18 @@ public class BattleParticipant {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "battle_id", nullable = false)
+    @JsonBackReference("battle-participants")
     private Battle battle;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnoreProperties({
+            "battleParticipants", // Tên collection trong User trỏ về BattleParticipant (nếu có)
+            "userProgress",       // Các collection lớn khác không cần thiết
+            "userRatings",        // Các collection lớn khác không cần thiết
+            "passwordHash",       // Các field nhạy cảm
+            "createdAt"           // Các field không cần thiết
+    })
     private User user;
 
     @Column(columnDefinition = "INT DEFAULT 0")

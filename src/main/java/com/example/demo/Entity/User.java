@@ -1,6 +1,7 @@
 package com.example.demo.Entity;
 
 import com.example.demo.Enums.UserRoleEnum;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -42,6 +43,14 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @JsonManagedReference("user-badges")
     private Set<UserBadge> userBadges;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonManagedReference("user-battle-entry")
+    private Set<BattleParticipant> battleParticipants;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonBackReference("user-rating-entry")
+    private UserRating userRating;
 
     public User(){}
 

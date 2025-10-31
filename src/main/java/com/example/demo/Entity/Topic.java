@@ -1,5 +1,6 @@
 package com.example.demo.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.util.Set;
@@ -21,6 +22,7 @@ public class Topic {
 
     @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL)
     @JsonManagedReference("topic-quest")
+    @JsonIgnoreProperties({"topic"})
     private Set<Quest> quests = Set.of();
 
     public Topic(){}

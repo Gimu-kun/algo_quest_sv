@@ -6,6 +6,8 @@ import com.example.demo.Services.BattleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,10 +25,17 @@ public class BattleController {
     // CRUD cho Battle
     // ======================
 
-    @Operation(summary = "Lấy tất cả trận đấu")
+    @Operation(summary = "Lấy tất cả trận đấu (có phân trang, tìm kiếm và lọc)")
     @GetMapping
-    public List<Battle> getAllBattles() {
-        return battleService.getAllBattles();
+    public Page<Battle> getAllBattles(
+            // THAY ĐỔI LỚN: Sử dụng Pageable để xử lý page, size, và sort tự động
+            Pageable pageable,
+            // Giữ lại các tham số tìm kiếm và lọc tùy chỉnh
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String status
+    ) {
+        // Cập nhật hàm service để nhận Pageable
+        return battleService.getAllBattles(pageable, search, status);
     }
 
     @Operation(summary = "Lấy thông tin một trận đấu theo ID")

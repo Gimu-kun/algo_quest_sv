@@ -9,6 +9,11 @@ import com.example.demo.Repository.BattleRepository;
 import com.example.demo.Repository.UserRatingRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import javax.swing.text.html.Option;
@@ -28,8 +33,30 @@ public class BattleService {
     @Autowired
     private UserRatingRepository userRatingRepository;
 
-    public List<Battle> getAllBattles() {
-        return battleRepository.findAll();
+    public Page<Battle> getAllBattles(Pageable pageable, String search, String status) {
+
+        // Khởi tạo Specification trống (non-deprecated)
+        Specification<Battle> spec = (root, query, criteriaBuilder) -> criteriaBuilder.conjunction();
+
+        // Lọc theo Status (Trạng thái)
+        if (status != null && !status.isEmpty()) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("status"), status));
+        }
+
+        // Tìm kiếm theo Topic Name
+        if (search != null && !search.isEmpty()) {
+            spec = spec.and((root, query, cb) -> {
+                // Tối ưu hóa JOIN Topic nếu cần thiết
+                return cb.like(
+                        cb.lower(root.get("topic").get("topicName")),
+                        "%" + search.toLowerCase() + "%"
+                );
+            });
+        }
+
+        // Thực hiện truy vấn với Specification và Pageable
+        // Pageable tự động bao gồm Sort (từ tham số URL)
+        return battleRepository.findAll(spec, pageable);
     }
 
     public Battle getBattleById(Integer id) {

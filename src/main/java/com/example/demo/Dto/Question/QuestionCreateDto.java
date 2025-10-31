@@ -22,18 +22,27 @@ public class QuestionCreateDto {
 
     @NotNull
     private Integer correctXpReward;
+    private Integer partialCredit;
+    private String synonyms;
+    private String codeTemplate;
+    private String testCases;
+    private String testResults;
 
-    @NotEmpty
-    private List<AnswerDto> answers;
+    private List<AnswerDto> answers; // Sử dụng @NotEmpty nếu đây là DTO cho loại câu hỏi cần đáp án
 
     public QuestionCreateDto(){}
 
-    public QuestionCreateDto(Integer questId, String questionText, BloomLevel bloomLevel, QuestionType questionType, Integer correctXpReward, List<AnswerDto> answers) {
+    public QuestionCreateDto(Integer questId, String questionText, BloomLevel bloomLevel, QuestionType questionType, Integer correctXpReward, Integer partialCredit, String synonyms, String codeTemplate, String testCases, String testResults, List<AnswerDto> answers) {
         this.questId = questId;
         this.questionText = questionText;
         this.bloomLevel = bloomLevel;
         this.questionType = questionType;
         this.correctXpReward = correctXpReward;
+        this.partialCredit = partialCredit;
+        this.synonyms = synonyms;
+        this.codeTemplate = codeTemplate;
+        this.testCases = testCases;
+        this.testResults = testResults;
         this.answers = answers;
     }
 
@@ -75,6 +84,46 @@ public class QuestionCreateDto {
 
     public void setCorrectXpReward(Integer correctXpReward) {
         this.correctXpReward = correctXpReward;
+    }
+
+    public Integer getPartialCredit() {
+        return partialCredit;
+    }
+
+    public void setPartialCredit(Integer partialCredit) {
+        this.partialCredit = partialCredit;
+    }
+
+    public String getSynonyms() {
+        return synonyms;
+    }
+
+    public void setSynonyms(String synonyms) {
+        this.synonyms = synonyms;
+    }
+
+    public String getCodeTemplate() {
+        return codeTemplate;
+    }
+
+    public void setCodeTemplate(String codeTemplate) {
+        this.codeTemplate = codeTemplate;
+    }
+
+    public String getTestCases() {
+        return testCases;
+    }
+
+    public void setTestCases(String testCases) {
+        this.testCases = testCases;
+    }
+
+    public String getTestResults() {
+        return testResults;
+    }
+
+    public void setTestResults(String testResults) {
+        this.testResults = testResults;
     }
 
     public List<AnswerDto> getAnswers() {

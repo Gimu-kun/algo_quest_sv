@@ -1,5 +1,7 @@
 package com.example.demo.Entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -10,8 +12,9 @@ public class UserRating {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer ratingId;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @JsonManagedReference("user-rating-entry")
     private User user;
 
     @Column(columnDefinition = "INT DEFAULT 1000")
