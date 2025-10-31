@@ -19,6 +19,9 @@ public class Question {
     @JsonBackReference("quest-question")
     private Quest quest;
 
+    @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
+    private Integer orderIndex = 0;
+
     @Lob
     @Column(nullable = false)
     private String questionText;
@@ -167,6 +170,14 @@ public class Question {
 
     public void setAnswers(Set<Answer> answers) {
         this.answers = answers;
+    }
+
+    public Integer getOrderIndex() {
+        return orderIndex;
+    }
+
+    public void setOrderIndex(Integer orderIndex) {
+        this.orderIndex = orderIndex;
     }
 
     @Override

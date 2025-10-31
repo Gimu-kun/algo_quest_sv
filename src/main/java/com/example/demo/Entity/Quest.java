@@ -19,6 +19,9 @@ public class Quest {
     @JsonBackReference("topic-quest")
     private Topic topic;
 
+    @Column(columnDefinition = "INT DEFAULT 0")
+    private Integer orderIndex = 0;
+
     @Column(nullable = false, length = 100)
     private String questName;
 
@@ -35,6 +38,7 @@ public class Quest {
 
     @OneToMany(mappedBy = "quest", cascade = CascadeType.ALL)
     @JsonManagedReference("quest-question")
+    @OrderBy("orderIndex ASC")
     private Set<Question> questions;
 
     public Quest(){}
@@ -47,6 +51,14 @@ public class Quest {
         this.difficulty = difficulty;
         this.requiredXp = requiredXp;
         this.questions = questions;
+    }
+
+    public Integer getOrderIndex() {
+        return orderIndex;
+    }
+
+    public void setOrderIndex(Integer orderIndex) {
+        this.orderIndex = orderIndex;
     }
 
     public Integer getQuestId() {
