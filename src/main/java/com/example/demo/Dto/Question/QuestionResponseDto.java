@@ -23,7 +23,8 @@ public class QuestionResponseDto {
     // ----------------------
 
     private List<AnswerDto> answers;
-    private QuestNameProjection quest; // Sử dụng Projection
+    private QuestNameProjection quest;
+    private Integer orderIndex;
 
     public QuestionResponseDto() {
     }
@@ -39,6 +40,7 @@ public class QuestionResponseDto {
         this.codeTemplate = question.getCodeTemplate();
         this.testCases = question.getTestCases();
         this.testResults = question.getTestResults();
+        this.orderIndex = question.getOrderIndex();
 
         // Map Answers sang AnswerDto
         this.answers = question.getAnswers().stream()
@@ -163,5 +165,13 @@ public class QuestionResponseDto {
 
     public void setQuest(QuestNameProjection quest) {
         this.quest = quest;
+    }
+
+    public Integer getOrderIndex() {
+        return orderIndex;
+    }
+
+    public void setOrderIndex(Integer orderIndex) {
+        this.orderIndex = orderIndex;
     }
 }
