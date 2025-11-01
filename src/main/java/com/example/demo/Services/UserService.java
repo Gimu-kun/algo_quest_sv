@@ -1,13 +1,11 @@
 package com.example.demo.Services;
 
 import com.example.demo.Entity.User;
-import com.example.demo.Enums.UserRoleEnum;
 import com.example.demo.Repository.UserRepository;
 import com.example.demo.Utils.PasswordsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,9 +17,6 @@ public class UserService {
 
     // Tạo user mới
     public User createUser(User user) {
-        user.setPasswordHash(PasswordsUtil.hashPassword(user.getPasswordHash()));
-        user.setCreatedAt(LocalDateTime.now());
-        user.setRole(UserRoleEnum.player);
         return userRepository.save(user);
     }
 
@@ -41,7 +36,6 @@ public class UserService {
             user.setFullName(newUser.getFullName());
             user.setEmail(newUser.getEmail());
             user.setAvatar(newUser.getAvatar());
-            // Nếu có password mới thì hash lại
             if (newUser.getPasswordHash() != null && !newUser.getPasswordHash().isEmpty()) {
                 user.setPasswordHash(PasswordsUtil.hashPassword(newUser.getPasswordHash()));
             }

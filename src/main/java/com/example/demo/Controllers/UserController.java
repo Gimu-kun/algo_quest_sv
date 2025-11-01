@@ -2,21 +2,32 @@ package com.example.demo.Controllers;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.demo.Dto.Auth.AuthResponse;
+import com.example.demo.Dto.Auth.RegisterRequestDTO;
 import com.example.demo.Entity.User;
 import com.example.demo.Enums.UserRoleEnum;
 import com.example.demo.Services.UserService;
 import com.example.demo.Utils.JwtUtil;
+import com.example.demo.Utils.PasswordsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @RestController
 @RequestMapping("/api/users")
 @CrossOrigin("*")
 public class UserController {
+
+    @Value("${file.upload-dir}")
+    private String uploadDir;
 
     @Autowired
     private UserService userService;
@@ -26,9 +37,66 @@ public class UserController {
 
     // Tạo mới user
     @PostMapping
-    public ResponseEntity<?> createUser(@RequestBody User user) {
-        User created = userService.createUser(user);
-        return ResponseEntity.ok(created);
+    public ResponseEntity<?> createUser(@RequestBody RegisterRequestDTO request) {
+        try {
+            String avatarPath = null;
+            String base64String = request.getAvatarBase64();
+
+            if (base64String != null && !base64String.isEmpty()) {
+
+                String[] parts = base64String.split(",");
+                if (parts.length < 2) {
+                    throw new IllegalArgumentException("Chuỗi Base64 không hợp lệ.");
+                }
+                String base64Image = parts[1];
+                String mimeTypeHeader = parts[0]; // Ví dụ: "data:image/jpeg"
+
+                // 2. Decode Base64 thành byte array
+                byte[] imageBytes = Base64.getDecoder().decode(base64Image);
+
+                // 3. Xác định phần mở rộng và TẠO TÊN FILE DUY NHẤT
+                String fileExtension = ".jpg";
+                if (mimeTypeHeader.contains("png")) {
+                    fileExtension = ".png";
+                } else if (mimeTypeHeader.contains("gif")) {
+                    fileExtension = ".gif";
+                } // Thêm các định dạng khác nếu cần
+
+                String uniqueFileName = "avatar_" + request.getUsername() + fileExtension;
+
+                // 4. Đảm bảo thư mục tồn tại
+                File uploadDirFile = new File(uploadDir);
+                if (!uploadDirFile.exists()) {
+                    uploadDirFile.mkdirs();
+                }
+
+                // 5. Ghi byte array xuống đĩa
+                java.nio.file.Path dest = Paths.get(uploadDir + File.separator + uniqueFileName);
+                Files.write(dest, imageBytes);
+
+                // 6. Lưu đường dẫn tương đối vào CSDL
+                avatarPath = "/uploads/" + uniqueFileName;
+            }
+
+            // 7. Tạo đối tượng User từ DTO
+            User user = new User();
+            user.setUsername(request.getUsername());
+            user.setPasswordHash(PasswordsUtil.hashPassword(request.getPassword()));
+            user.setEmail(request.getEmail());
+            user.setFullName(request.getFullName());
+            user.setAvatar(avatarPath);
+            // Gán role, đảm bảo giá trị hợp lệ
+            user.setRole(UserRoleEnum.valueOf(request.getRole() != null ? request.getRole() : "player"));
+            user.setCreatedAt(LocalDateTime.now());
+
+            // 8. Gọi Service để xử lý và lưu vào CSDL
+            User created = userService.createUser(user);
+            return ResponseEntity.ok(created);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("Đăng ký thất bại: " + e.getMessage());
+        }
     }
 
     // Lấy tất cả user
