@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+
 
 import java.io.File;
 import java.nio.file.Files;
@@ -25,7 +25,6 @@ import java.util.*;
 @RequestMapping("/api/users")
 @CrossOrigin("*")
 public class UserController {
-
     @Value("${file.upload-dir}")
     private String uploadDir;
 
@@ -60,36 +59,30 @@ public class UserController {
                     fileExtension = ".png";
                 } else if (mimeTypeHeader.contains("gif")) {
                     fileExtension = ".gif";
-                } // Thêm các định dạng khác nếu cần
+                }
 
                 String uniqueFileName = "avatar_" + request.getUsername() + fileExtension;
 
-                // 4. Đảm bảo thư mục tồn tại
                 File uploadDirFile = new File(uploadDir);
                 if (!uploadDirFile.exists()) {
                     uploadDirFile.mkdirs();
                 }
 
-                // 5. Ghi byte array xuống đĩa
                 java.nio.file.Path dest = Paths.get(uploadDir + File.separator + uniqueFileName);
                 Files.write(dest, imageBytes);
 
-                // 6. Lưu đường dẫn tương đối vào CSDL
                 avatarPath = "/uploads/" + uniqueFileName;
             }
 
-            // 7. Tạo đối tượng User từ DTO
             User user = new User();
             user.setUsername(request.getUsername());
             user.setPasswordHash(PasswordsUtil.hashPassword(request.getPassword()));
             user.setEmail(request.getEmail());
             user.setFullName(request.getFullName());
             user.setAvatar(avatarPath);
-            // Gán role, đảm bảo giá trị hợp lệ
             user.setRole(UserRoleEnum.valueOf(request.getRole() != null ? request.getRole() : "player"));
             user.setCreatedAt(LocalDateTime.now());
 
-            // 8. Gọi Service để xử lý và lưu vào CSDL
             User created = userService.createUser(user);
             return ResponseEntity.ok(created);
 

@@ -1,6 +1,10 @@
 package com.example.demo.Services;
 
+import com.example.demo.Dto.Quest.QuestSummaryDto;
+import com.example.demo.Dto.Topic.TopicSummaryDto;
+import com.example.demo.Entity.Quest;
 import com.example.demo.Entity.Topic;
+import com.example.demo.Repository.QuestRepository;
 import com.example.demo.Repository.TopicRepository;
 import com.example.demo.Dto.Topic.TopicUpdateDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +17,11 @@ import java.util.Optional;
 public class TopicService {
 
     private final TopicRepository topicRepository;
+    private final QuestRepository questRepository;
 
     @Autowired
-    public TopicService(TopicRepository topicRepository) {
+    public TopicService(TopicRepository topicRepository, QuestRepository questRepository) {
+        this.questRepository = questRepository;
         this.topicRepository = topicRepository;
     }
 
@@ -30,6 +36,23 @@ public class TopicService {
     // Lấy tất cả chủ đề
     public List<Topic> getAllTopics() {
         return topicRepository.findAll();
+    }
+
+    public List<TopicSummaryDto> getAllTopicSummaries() {
+        return topicRepository.findAll().stream()
+                .map(this::convertToSummaryDto)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    private TopicSummaryDto convertToSummaryDto(Topic topic) {
+        int questCount = topic.getQuests() != null ? topic.getQuests().size() : 0;
+        return new TopicSummaryDto(
+                topic.getTopicId(),
+                topic.getTopicName(),
+                topic.getDescription(),
+                topic.getOrderIndex(),
+                questCount
+        );
     }
 
     // Lấy chủ đề theo Id
@@ -73,5 +96,34 @@ public class TopicService {
         public ResourceNotFoundException(String message) {
             super(message);
         }
+    }
+
+    public List<QuestSummaryDto> getQuestSummariesByTopicId(Integer topicId) {
+
+        // 1. Kiểm tra xem Topic có tồn tại không (Tùy chọn, nên có)
+        if (!topicRepository.existsById(topicId)) {
+            throw new ResourceNotFoundException("Topic not found with id " + topicId);
+        }
+
+        // 2. Lấy danh sách Quests
+        // Chúng ta sử dụng QuestRepository để tìm trực tiếp các quests theo Topic ID,
+        // và sắp xếp theo OrderIndex
+        List<Quest> quests = questRepository.findByTopic_TopicIdOrderByOrderIndexAsc(topicId);
+
+        // 3. Ánh xạ từ Quest Entity sang QuestSummaryDto
+        return quests.stream()
+                .map(this::convertToQuestSummaryDto)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    private QuestSummaryDto convertToQuestSummaryDto(Quest quest) {
+        return new QuestSummaryDto(
+                quest.getQuestId(),
+                quest.getQuestName(),
+                quest.getOrderIndex(),
+                quest.getQuestType().name(),
+                quest.getDifficulty().name(),
+                quest.getRequiredXp()
+        );
     }
 }

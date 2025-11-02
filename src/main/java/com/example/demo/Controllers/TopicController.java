@@ -1,5 +1,7 @@
 package com.example.demo.Controllers;
 
+import com.example.demo.Dto.Quest.QuestSummaryDto;
+import com.example.demo.Dto.Topic.TopicSummaryDto;
 import com.example.demo.Entity.Topic;
 import com.example.demo.Services.TopicService;
 import com.example.demo.Dto.Topic.TopicUpdateDto;
@@ -43,6 +45,12 @@ public class TopicController {
         return ResponseEntity.ok(topics);
     }
 
+    @GetMapping("/summary")
+    public ResponseEntity<List<TopicSummaryDto>> getAllTopicSummaries() {
+        List<TopicSummaryDto> summaries = topicService.getAllTopicSummaries();
+        return ResponseEntity.ok(summaries);
+    }
+
     // GET: /api/topics/{id}
     // READ BY ID: Lấy chủ đề theo ID
     @GetMapping("/{id}")
@@ -71,6 +79,16 @@ public class TopicController {
         try {
             topicService.deleteTopic(id);
             return ResponseEntity.noContent().build();
+        } catch (TopicService.ResourceNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/{topicId}/quests/summary")
+    public ResponseEntity<List<QuestSummaryDto>> getQuestSummariesByTopicId(@PathVariable Integer topicId) {
+        try {
+            List<QuestSummaryDto> questSummaries = topicService.getQuestSummariesByTopicId(topicId);
+            return ResponseEntity.ok(questSummaries);
         } catch (TopicService.ResourceNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
