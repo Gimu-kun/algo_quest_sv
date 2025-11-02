@@ -1,12 +1,15 @@
 package com.example.demo.Services;
 
+import com.example.demo.Dto.Quest.QuestStatusDTO;
 import com.example.demo.Entity.*;
 import com.example.demo.Repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class QuestCompletionService {
@@ -88,6 +91,45 @@ public class QuestCompletionService {
                     return questCompletionRepository.save(existing);
                 })
                 .orElseThrow(() -> new RuntimeException("QuestCompletion not found"));
+    }
+
+    public List<QuestStatusDTO> getQuestsStatusForUserAndTopic(Integer userId, Integer topicId) {
+        // 1. Lấy tất cả Quests của Topic, sắp xếp theo orderIndex
+        List<Quest> quests = questRepository.findByTopic_TopicIdOrderByOrderIndexAsc(topicId);
+
+        // 2. Lấy danh sách các ID Quest đã hoàn thành của người dùng
+        Set<Integer> completedQuestIds = questCompletionRepository.findDistinctQuestIdsByUser(
+                userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"))
+        );
+
+        List<QuestStatusDTO> questStatuses = new ArrayList<>();
+        boolean isPreviousQuestCompleted = true; // Bắt đầu bằng true để Quest đầu tiên luôn mở
+
+        for (Quest quest : quests) {
+            boolean isCompleted = completedQuestIds.contains(quest.getQuestId());
+            boolean isLocked = !isPreviousQuestCompleted;
+
+            // Tạo DTO
+            QuestStatusDTO dto = new QuestStatusDTO(
+                    quest.getQuestId(),
+                    quest.getQuestName(),
+                    quest.getOrderIndex(),
+                    isCompleted,
+                    isLocked,
+                    quest.getDifficulty(),
+                    quest.getQuestType(),
+                    quest.getRequiredXp()
+            );
+            questStatuses.add(dto);
+
+            // Cập nhật trạng thái cho Quest tiếp theo
+            if (!isCompleted) {
+                // Nếu Quest hiện tại chưa hoàn thành, tất cả các Quest sau nó sẽ bị khóa
+                isPreviousQuestCompleted = false;
+            }
+        }
+
+        return questStatuses;
     }
 
     public void deleteQuestCompletion(Integer id) {

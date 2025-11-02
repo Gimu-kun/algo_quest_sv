@@ -1,5 +1,6 @@
 package com.example.demo.Controllers;
 
+import com.example.demo.Dto.Quest.QuestStatusDTO;
 import com.example.demo.Entity.QuestCompletion;
 import com.example.demo.Services.QuestCompletionService;
 import org.springframework.http.ResponseEntity;
@@ -17,18 +18,18 @@ public class QuestCompletionController {
         this.questCompletionService = questCompletionService;
     }
 
-    @GetMapping("/user/{userId}/topic/{topicId}")
-    public ResponseEntity<List<QuestCompletion>> getCompletionsByUserAndTopic(
+    @GetMapping("/status/user/{userId}/topic/{topicId}")
+    public ResponseEntity<List<QuestStatusDTO>> getQuestsStatusForUserAndTopic(
             @PathVariable Integer userId,
             @PathVariable Integer topicId) {
 
-        List<QuestCompletion> completions = questCompletionService.getCompletionsByUserAndTopic(userId, topicId);
+        List<QuestStatusDTO> statuses = questCompletionService.getQuestsStatusForUserAndTopic(userId, topicId);
 
-        if (completions.isEmpty()) {
+        if (statuses.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.ok(completions);
+        return ResponseEntity.ok(statuses);
     }
 
     @GetMapping
