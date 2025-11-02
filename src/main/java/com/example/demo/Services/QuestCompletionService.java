@@ -40,6 +40,10 @@ public class QuestCompletionService {
         return questCompletionRepository.findById(id);
     }
 
+    public List<QuestCompletion> getCompletionsByUserAndTopic(Integer userId, Integer topicId) {
+        return questCompletionRepository.findByUser_UserIdAndQuest_Topic_TopicId(userId, topicId);
+    }
+
     @Transactional
     public QuestCompletion createQuestCompletion(Integer userId, Integer questId, Integer score, Integer xpEarned) {
         User user = userRepository.findById(userId)

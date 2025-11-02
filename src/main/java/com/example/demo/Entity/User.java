@@ -2,9 +2,11 @@ package com.example.demo.Entity;
 
 import com.example.demo.Enums.UserRoleEnum;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -51,6 +53,10 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonBackReference("user-rating-entry")
     private UserRating userRating;
+
+    @OneToMany(mappedBy = "user")
+    @JsonManagedReference("completion_user")
+    private List<QuestCompletion> completions;
 
     public User(){}
 

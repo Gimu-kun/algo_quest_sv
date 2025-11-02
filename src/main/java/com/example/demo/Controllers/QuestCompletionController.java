@@ -17,6 +17,20 @@ public class QuestCompletionController {
         this.questCompletionService = questCompletionService;
     }
 
+    @GetMapping("/user/{userId}/topic/{topicId}")
+    public ResponseEntity<List<QuestCompletion>> getCompletionsByUserAndTopic(
+            @PathVariable Integer userId,
+            @PathVariable Integer topicId) {
+
+        List<QuestCompletion> completions = questCompletionService.getCompletionsByUserAndTopic(userId, topicId);
+
+        if (completions.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(completions);
+    }
+
     @GetMapping
     public ResponseEntity<List<QuestCompletion>> getAllCompletions() {
         return ResponseEntity.ok(questCompletionService.getAllCompletions());

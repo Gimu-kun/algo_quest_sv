@@ -3,8 +3,11 @@ package com.example.demo.Entity;
 import com.example.demo.Enums.Difficulty;
 import com.example.demo.Enums.QuestType;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -40,6 +43,10 @@ public class Quest {
     @JsonManagedReference("quest-question")
     @OrderBy("orderIndex ASC")
     private Set<Question> questions;
+
+    @OneToMany(mappedBy = "quest")
+    @JsonIgnore
+    private List<QuestCompletion> completions;
 
     public Quest(){}
 

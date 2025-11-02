@@ -11,6 +11,8 @@ import java.util.Set;
 public interface QuestCompletionRepository extends JpaRepository<QuestCompletion,Integer> {
     List<QuestCompletion> findByUser_UserId(Integer userId);
 
+    List<QuestCompletion> findByUser_UserIdAndQuest_Topic_TopicId(Integer userId, Integer topicId);
+
     // 1. Phương thức ĐẾM SỐ QUEST ĐÃ HOÀN THÀNH (Cần trả về Long hoặc Integer)
     // *** SỬA LỖI NÀY ***
     @Query("SELECT COUNT(DISTINCT qc.quest.questId) FROM QuestCompletion qc WHERE qc.user = :user")
